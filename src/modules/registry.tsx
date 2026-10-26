@@ -25,13 +25,6 @@ export const IMPLEMENTED_MODULES: Record<string, LazyExoticComponent<ComponentTy
   'nhan-su/bao-cao-cuoc-hop': lazy(() => import('./nhan-su/cuoc-hop/BaoCaoCuocHopPage')),
   'nhan-su/thiet-lap-cuoc-hop': lazy(() => import('./nhan-su/cuoc-hop/ThietLapCuocHopPage')),
 
-  // === NHÂN SỰ: Đào tạo ===
-  'nhan-su/ke-hoach-dao-tao': lazy(() => import('./nhan-su/dao-tao/KeHoachDaoTaoPage')),
-  'nhan-su/khoa-dao-tao': lazy(() => import('./nhan-su/dao-tao/KhoaDaoTaoPage')),
-  'nhan-su/dang-ky-dao-tao': lazy(() => import('./nhan-su/dao-tao/DangKyDaoTaoPage')),
-  'nhan-su/bao-cao-dao-tao': lazy(() => import('./nhan-su/dao-tao/BaoCaoDaoTaoPage')),
-  'nhan-su/thiet-lap-dao-tao': lazy(() => import('./nhan-su/dao-tao/ThietLapDaoTaoPage')),
-
   // === HÀNH CHÍNH: Công lương ===
   'hanh-chinh/cham-cong': lazy(() => import('./hanh-chinh/cham-cong/ChamCongPage')),
   'hanh-chinh/tong-hop-cham-cong': lazy(() => import('./hanh-chinh/cong-luong/TongHopChamCongPage')),

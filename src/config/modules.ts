@@ -16,7 +16,6 @@ import {
   FileText,
   FolderOpen,
   Fuel,
-  GraduationCap,
   Mail,
   MapPin,
   Receipt,
@@ -146,16 +145,6 @@ export const NHAN_SU_GROUPS: ModuleGroupDef[] = [
       ns('bien-ban-hop', 'bienBanHop', FilePenLine, 'bg-violet-500'),
       ns('bao-cao-cuoc-hop', 'baoCaoCuocHop', ChartColumn, 'bg-cyan-500'),
       ns('thiet-lap-cuoc-hop', 'thietLapCuocHop', Settings, 'bg-slate-500'),
-    ],
-  },
-  {
-    groupKey: 'page.nhanSu.groupDaoTao',
-    items: [
-      ns('ke-hoach-dao-tao', 'keHoachDaoTao', Calendar, 'bg-blue-500'),
-      ns('khoa-dao-tao', 'khoaDaoTao', GraduationCap, 'bg-emerald-500'),
-      ns('dang-ky-dao-tao', 'dangKyDaoTao', ClipboardList, 'bg-teal-500'),
-      ns('bao-cao-dao-tao', 'baoCaoDaoTao', ChartColumn, 'bg-cyan-500'),
-      ns('thiet-lap-dao-tao', 'thietLapDaoTao', Settings, 'bg-slate-500'),
     ],
   },
 ];
