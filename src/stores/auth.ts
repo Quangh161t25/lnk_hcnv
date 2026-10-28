@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { INITIAL_EMPLOYEES, type Employee } from './employees';
+import type { Employee } from './employees';
 
 export interface AuthUser {
   id: string;
@@ -16,32 +16,23 @@ export interface AuthUser {
 interface AuthState {
   user: AuthUser | null;
   isAuthenticated: boolean;
+  /** Mã phiên do /api/login cấp; null khi đăng nhập chế độ offline (không có API). */
+  token: string | null;
   login: (user: AuthUser) => void;
-  loginAsEmployee: (emp: Employee) => void;
+  loginAsEmployee: (emp: Employee, token?: string | null) => void;
   logout: () => void;
 }
-
-const DEFAULT_ADMIN = INITIAL_EMPLOYEES[0];
-
-const INITIAL_USER: AuthUser = {
-  id: DEFAULT_ADMIN.id,
-  email: DEFAULT_ADMIN.email,
-  full_name: DEFAULT_ADMIN.ho_ten,
-  role: DEFAULT_ADMIN.vai_tro,
-  avatar_url: DEFAULT_ADMIN.avatar_url,
-  department: DEFAULT_ADMIN.phong_ban,
-  position: DEFAULT_ADMIN.chuc_vu,
-  employee_code: DEFAULT_ADMIN.ma_nv,
-};
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
-      user: INITIAL_USER,
-      isAuthenticated: true,
+      user: null,
+      isAuthenticated: false,
+      token: null,
       login: (user) => set({ user, isAuthenticated: true }),
-      loginAsEmployee: (emp) =>
+      loginAsEmployee: (emp, token = null) =>
         set({
+          token,
           user: {
             id: emp.id,
             email: emp.email,
@@ -54,9 +45,17 @@ export const useAuthStore = create<AuthState>()(
           },
           isAuthenticated: true,
         }),
-      logout: () => set({ user: null, isAuthenticated: false }),
+      logout: () => set({ user: null, isAuthenticated: false, token: null }),
     }),
-    { name: 'vugia-auth-storage' },
+    {
+      name: 'vugia-auth-storage',
+      version: 2,
+      // Phiên cũ (trước khi có đăng nhập qua server) không có token: buộc đăng nhập lại một lần.
+      migrate: (persisted) => {
+        const p = (persisted ?? {}) as Partial<AuthState>;
+        return p.token ? (p as AuthState) : ({ user: null, isAuthenticated: false, token: null } as unknown as AuthState);
+      },
+    },
   ),
 );
 

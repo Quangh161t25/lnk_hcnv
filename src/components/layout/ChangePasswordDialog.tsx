@@ -6,6 +6,7 @@ import { t } from '@/lib/i18n';
 import { Button } from '@/components/ui/Button';
 import { useAuthStore } from '@/stores/auth';
 import { useEmployeeStore } from '@/stores/employees';
+import { apiFetch } from '@/lib/api';
 
 type Field = 'current' | 'new' | 'confirm';
 
@@ -25,23 +26,24 @@ export function ChangePasswordDialog({ onClose }: { onClose: () => void }) {
     e.preventDefault();
     setError(null);
     if (!values.current.trim()) return setError(t('nav.changePassword.errorCurrentRequired'));
-
-    // Kiểm tra mật khẩu hiện tại
-    const currentEmp = employees.find((emp) => emp.id === user?.id || emp.ma_nv === user?.employee_code);
-    const expectedCurrent = currentEmp?.mat_khau || '123456';
-    if (values.current !== expectedCurrent) {
-      return setError('Mật khẩu hiện tại không chính xác!');
-    }
-
     if (values.new.length < 6) return setError(t('nav.changePassword.errorNewMin'));
     if (values.new !== values.confirm) return setError(t('nav.changePassword.errorConfirmMismatch'));
 
     setSaving(true);
-    await new Promise((r) => setTimeout(r, 600));
-    if (currentEmp) {
-      updateEmployee(currentEmp.id, { mat_khau: values.new });
+    try {
+      // Kiểm tra mật khẩu cũ và ghi mật khẩu mới vào Google Sheet tại server.
+      const res = await apiFetch('/api/change-password', { method: 'POST', body: JSON.stringify({ current: values.current, next: values.new }) });
+      if (!res) {
+        // Không có API (chạy offline): kiểm tra theo dữ liệu trên trình duyệt như trước.
+        const currentEmp = employees.find((emp) => emp.id === user?.id || emp.ma_nv === user?.employee_code);
+        if (values.current !== (currentEmp?.mat_khau || '123456')) return setError('Mật khẩu hiện tại không chính xác!');
+        if (currentEmp) updateEmployee(currentEmp.id, { mat_khau: values.new });
+      }
+    } catch (err) {
+      return setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
     onClose();
     toast.success('Đổi mật khẩu thành công! Mật khẩu mới đã được cập nhật.');
   };

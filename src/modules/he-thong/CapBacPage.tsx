@@ -7,6 +7,8 @@ import { Drawer } from '@/components/ui/Drawer';
 import { useConfirm } from '@/stores/confirm';
 import { formatCurrency } from '@/lib/format';
 import { toast } from 'sonner';
+import { useSheetTable } from '@/lib/sheetTable';
+import { DataSourceBadge } from '@/components/ui/DataSourceBadge';
 import jobLevelsSeed from '@/data/jobLevels.json';
 
 interface JobLevel {
@@ -22,7 +24,8 @@ interface JobLevel {
 
 export function CapBacPage() {
   const confirm = useConfirm();
-  const [jobLevels, setJobLevels] = useState<JobLevel[]>(() => jobLevelsSeed as JobLevel[]);
+  const levelTable = useSheetTable<JobLevel>('jobLevels', jobLevelsSeed as JobLevel[]);
+  const { rows: jobLevels, setRows: setJobLevels } = levelTable;
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
@@ -177,6 +180,10 @@ export function CapBacPage() {
           </div>
           <p className="mt-2 text-2xl font-bold text-foreground">{formatCurrency(stats.avgSalary)}</p>
         </div>
+      </div>
+
+      <div className="flex justify-end -mt-1 -mb-1">
+        <DataSourceBadge source={levelTable.source} tab="17. DanhMuc_CapBac" isLoading={levelTable.isLoading} isSaving={levelTable.isSaving} />
       </div>
 
       {/* Main Container */}

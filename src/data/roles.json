@@ -1,0 +1,61 @@
+[
+  {
+    "id": "admin",
+    "name": "Quản trị tối cao (Admin)",
+    "description": "Toàn quyền truy cập và thiết lập mọi module trên hệ thống ERP Vũ Gia.",
+    "isSystem": true,
+    "permissions": [
+      "hc_view",
+      "hc_create",
+      "hc_approve",
+      "hc_salary",
+      "ns_view",
+      "ns_manage",
+      "ns_recruitment",
+      "ns_contracts",
+      "sys_config",
+      "sys_roles",
+      "sys_backup",
+      "ai_access"
+    ]
+  },
+  {
+    "id": "hr_manager",
+    "name": "Quản lý Hành chính - Nhân sự",
+    "description": "Quản lý toàn diện nhân sự, tuyển dụng, hợp đồng, chấm công và tài sản.",
+    "permissions": [
+      "hc_view",
+      "hc_create",
+      "hc_approve",
+      "hc_salary",
+      "ns_view",
+      "ns_manage",
+      "ns_recruitment",
+      "ns_contracts",
+      "ai_access"
+    ]
+  },
+  {
+    "id": "dept_lead",
+    "name": "Trưởng phòng / Quản lý bộ phận",
+    "description": "Phê duyệt phiếu hành chính, đánh giá KPI và xem hồ sơ nhân sự cấp phòng.",
+    "permissions": [
+      "hc_view",
+      "hc_create",
+      "hc_approve",
+      "ns_view",
+      "ai_access"
+    ]
+  },
+  {
+    "id": "employee",
+    "name": "Cán bộ nhân viên (Chuẩn)",
+    "description": "Tự chấm công, tạo phiếu xin nghỉ, xem bảng lương cá nhân và tra cứu AI.",
+    "permissions": [
+      "hc_view",
+      "hc_create",
+      "ns_view",
+      "ai_access"
+    ]
+  }
+]

@@ -6,6 +6,9 @@ import { Input } from '@/components/ui/Input';
 import { Drawer } from '@/components/ui/Drawer';
 import { useConfirm } from '@/stores/confirm';
 import { toast } from 'sonner';
+import { useSheetTable } from '@/lib/sheetTable';
+import { DataSourceBadge } from '@/components/ui/DataSourceBadge';
+import branchesSeed from '@/data/branches.json';
 
 interface Branch {
   id: string;
@@ -18,42 +21,10 @@ interface Branch {
   trang_thai: string;
 }
 
-const INITIAL_BRANCHES: Branch[] = [
-  {
-    id: 'cn-1',
-    ma_chi_nhanh: 'CN-HN-01',
-    ten_chi_nhanh: 'Trụ sở chính Hà Nội (Vũ Gia Tower)',
-    dia_chi: 'Tầng 6, Tòa nhà Vũ Gia Tower, Số 168 Cầu Giấy, Q. Cầu Giấy, Hà Nội',
-    nguoi_phu_trach: 'Vũ Đức Gia (Tổng Giám đốc)',
-    so_dien_thoai: '024.3999.8888',
-    loai_chi_nhanh: 'Trụ sở chính',
-    trang_thai: 'Đang hoạt động',
-  },
-  {
-    id: 'cn-2',
-    ma_chi_nhanh: 'CN-HCM-02',
-    ten_chi_nhanh: 'Chi nhánh TP. Hồ Chí Minh',
-    dia_chi: 'Tầng 12, Tòa nhà Bitexco Financial, Số 2 Hải Triều, Bến Nghé, Quận 1, TP. HCM',
-    nguoi_phu_trach: 'Trần Thị Mai (Giám đốc CN Miền Nam)',
-    so_dien_thoai: '028.3888.9999',
-    loai_chi_nhanh: 'Chi nhánh',
-    trang_thai: 'Đang hoạt động',
-  },
-  {
-    id: 'cn-3',
-    ma_chi_nhanh: 'CN-DN-03',
-    ten_chi_nhanh: 'Chi nhánh Miền Trung - Đà Nẵng',
-    dia_chi: 'Số 48 Bạch Đằng, P. Thạch Thang, Q. Hải Châu, TP. Đà Nẵng',
-    nguoi_phu_trach: 'Nguyễn Văn An (Trưởng VP Đại diện)',
-    so_dien_thoai: '0236.3777.888',
-    loai_chi_nhanh: 'Văn phòng đại diện',
-    trang_thai: 'Đang hoạt động',
-  },
-];
-
 export function ChiNhanhPage() {
   const confirm = useConfirm();
-  const [branches, setBranches] = useState<Branch[]>(INITIAL_BRANCHES);
+  const branchTable = useSheetTable<Branch>('branches', branchesSeed as Branch[]);
+  const { rows: branches, setRows: setBranches } = branchTable;
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
@@ -191,6 +162,10 @@ export function ChiNhanhPage() {
           </div>
           <p className="mt-2 text-sm font-semibold text-foreground">Bắc - Trung - Nam</p>
         </div>
+      </div>
+
+      <div className="flex justify-end -mt-1 -mb-1">
+        <DataSourceBadge source={branchTable.source} tab="18. DanhMuc_ChiNhanh" isLoading={branchTable.isLoading} isSaving={branchTable.isSaving} />
       </div>
 
       {/* Main Container */}

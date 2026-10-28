@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/Input';
 import { Drawer } from '@/components/ui/Drawer';
 import { useConfirm } from '@/stores/confirm';
 import { toast } from 'sonner';
+import { useSheetTable } from '@/lib/sheetTable';
+import { DataSourceBadge } from '@/components/ui/DataSourceBadge';
 import positionsSeed from '@/data/positions.json';
 import departmentsSeed from '@/data/departments.json';
 
@@ -25,8 +27,9 @@ interface Position {
 
 export function ChucVuPage() {
   const confirm = useConfirm();
-  const [positions, setPositions] = useState<Position[]>(() => positionsSeed as Position[]);
-  const [departments] = useState(departmentsSeed);
+  const posTable = useSheetTable<Position>('positions', positionsSeed as Position[]);
+  const { rows: positions, setRows: setPositions } = posTable;
+  const { rows: departments } = useSheetTable('departments', departmentsSeed);
   const [search, setSearch] = useState('');
   const [deptFilter, setDeptFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -183,6 +186,10 @@ export function ChucVuPage() {
           </div>
           <p className="mt-2 text-2xl font-bold text-foreground">{departments.length}</p>
         </div>
+      </div>
+
+      <div className="flex justify-end -mt-1 -mb-1">
+        <DataSourceBadge source={posTable.source} tab="3. DanhMuc_ChucDanh" isLoading={posTable.isLoading} isSaving={posTable.isSaving} />
       </div>
 
       {/* Main Container */}

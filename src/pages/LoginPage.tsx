@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, Eye, EyeOff, Lock, LogIn, RefreshCw, ShieldAlert, User } from 'lucide-react';
+import { CheckCircle2, Eye, EyeOff, Lock, LogIn, ShieldAlert, User } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useAuthStore } from '@/stores/auth';
 import { useEmployeeStore } from '@/stores/employees';
-import { syncEmployeesStoreWithGoogleSheet } from '@/services/googleSheetsAuth';
+import { loginWithSheet } from '@/services/employeesSheet';
 import { toast } from 'sonner';
 
 export function LoginPage() {
@@ -18,37 +18,7 @@ export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [sheetSynced, setSheetSynced] = useState(false);
   const [showForgotModal, setShowForgotModal] = useState(false);
-
-  // Tự động đồng bộ tài khoản & mật khẩu từ Google Sheet khi vào trang đăng nhập
-  useEffect(() => {
-    let mounted = true;
-    syncEmployeesStoreWithGoogleSheet()
-      .then(() => {
-        if (mounted) setSheetSynced(true);
-      })
-      .catch(() => {
-        if (mounted) setSheetSynced(false);
-      });
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  const handleManualSync = async () => {
-    setIsSyncing(true);
-    try {
-      await syncEmployeesStoreWithGoogleSheet();
-      setSheetSynced(true);
-      toast.success('Đã đồng bộ tài khoản & mật khẩu mới nhất từ Google Sheet!');
-    } catch {
-      toast.error('Không thể đồng bộ với Google Sheet. Vui lòng thử lại sau.');
-    } finally {
-      setIsSyncing(false);
-    }
-  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,37 +36,27 @@ export function LoginPage() {
     setIsLoading(true);
 
     try {
-      // Luôn lấy dữ liệu mật khẩu mới nhất trực tiếp từ Google Sheet khi bấm Đăng nhập
-      let currentList = employees;
-      try {
-        currentList = await syncEmployeesStoreWithGoogleSheet();
-      } catch {
-        // Fallback to local store
-      }
-
-      // 1. Tìm nhân viên theo Email hoặc Mã NV
-      const matched = currentList.find(
-        (emp) => emp.email.toLowerCase() === query || emp.ma_nv.toLowerCase() === query
-      );
-
-      if (!matched) {
-        setIsLoading(false);
-        toast.error('Tài khoản hoặc Email không tồn tại trên hệ thống!');
+      // Mật khẩu được kiểm tra tại server với cột "Mật khẩu" trên Google Sheet;
+      // trình duyệt không bao giờ nhận danh sách mật khẩu.
+      const result = await loginWithSheet(query, password);
+      if (result) {
+        loginAsEmployee(result.employee, result.token);
+        toast.success(`Đăng nhập thành công! Chào mừng ${result.employee.ho_ten}`);
+        navigate('/');
         return;
       }
 
-      // 2. Kiểm tra mật khẩu chính xác từ Google Sheet
-      const expectedPassword = matched.mat_khau || '123456';
-      if (password !== expectedPassword) {
-        setIsLoading(false);
-        toast.error('Mật khẩu không chính xác! Vui lòng kiểm tra lại mật khẩu trên Google Sheet.');
+      // Không có API (chạy offline, vd. `vite dev`): kiểm tra theo dữ liệu mẫu trên trình duyệt.
+      const matched = employees.find((emp) => emp.email.toLowerCase() === query || emp.ma_nv.toLowerCase() === query);
+      if (!matched || password !== (matched.mat_khau || '123456')) {
+        toast.error('Tài khoản hoặc mật khẩu không chính xác');
         return;
       }
-
-      // 3. Đăng nhập thành công khi mật khẩu hoàn toàn chính xác
       loginAsEmployee(matched);
-      toast.success(`Đăng nhập thành công! Chào mừng ${matched.ho_ten}`);
+      toast.success(`Đăng nhập (chế độ offline) thành công! Chào mừng ${matched.ho_ten}`);
       navigate('/');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Không đăng nhập được, vui lòng thử lại');
     } finally {
       setIsLoading(false);
     }
@@ -119,16 +79,7 @@ export function LoginPage() {
         {/* Trạng thái liên kết Google Sheet */}
         <div className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
           <CheckCircle2 size={13} className="text-emerald-600 shrink-0" />
-          <span>{sheetSynced ? 'Đã đồng bộ mật khẩu với Google Sheet' : 'Đang kết nối dữ liệu Google Sheet...'}</span>
-          <button
-            type="button"
-            onClick={handleManualSync}
-            disabled={isSyncing}
-            title="Bấm để tải lại mật khẩu mới nhất từ Google Sheet"
-            className="ml-1 text-emerald-700 hover:text-emerald-900 focus:outline-none"
-          >
-            <RefreshCw size={12} className={isSyncing ? 'animate-spin' : ''} />
-          </button>
+          <span>Tài khoản xác thực theo dữ liệu nhân sự trên Google Sheet</span>
         </div>
       </div>
 

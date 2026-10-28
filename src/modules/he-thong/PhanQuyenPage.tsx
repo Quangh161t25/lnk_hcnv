@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { Shield, Check, Lock, Save, Users, Key } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { toast } from 'sonner';
+import { useSheetTable } from '@/lib/sheetTable';
+import { DataSourceBadge } from '@/components/ui/DataSourceBadge';
+import rolesSeed from '@/data/roles.json';
 
 interface PermissionItem {
   id: string;
@@ -40,36 +43,11 @@ interface Role {
   permissions: string[];
 }
 
-const INITIAL_ROLES: Role[] = [
-  {
-    id: 'admin',
-    name: 'Quản trị tối cao (Admin)',
-    description: 'Toàn quyền truy cập và thiết lập mọi module trên hệ thống ERP Vũ Gia.',
-    isSystem: true,
-    permissions: PERMISSIONS.map((p) => p.id),
-  },
-  {
-    id: 'hr_manager',
-    name: 'Quản lý Hành chính - Nhân sự',
-    description: 'Quản lý toàn diện nhân sự, tuyển dụng, hợp đồng, chấm công và tài sản.',
-    permissions: ['hc_view', 'hc_create', 'hc_approve', 'hc_salary', 'ns_view', 'ns_manage', 'ns_recruitment', 'ns_contracts', 'ai_access'],
-  },
-  {
-    id: 'dept_lead',
-    name: 'Trưởng phòng / Quản lý bộ phận',
-    description: 'Phê duyệt phiếu hành chính, đánh giá KPI và xem hồ sơ nhân sự cấp phòng.',
-    permissions: ['hc_view', 'hc_create', 'hc_approve', 'ns_view', 'ai_access'],
-  },
-  {
-    id: 'employee',
-    name: 'Cán bộ nhân viên (Chuẩn)',
-    description: 'Tự chấm công, tạo phiếu xin nghỉ, xem bảng lương cá nhân và tra cứu AI.',
-    permissions: ['hc_view', 'hc_create', 'ns_view', 'ai_access'],
-  },
-];
-
 export function PhanQuyenPage() {
-  const [roles, setRoles] = useState<Role[]>(INITIAL_ROLES);
+  const roleTable = useSheetTable<Role>('roles', rolesSeed as Role[]);
+  // Tích/bỏ quyền chỉ sửa bản nháp; bấm "Lưu ma trận phân quyền" mới ghi lên Sheet.
+  const [draft, setDraft] = useState<Role[] | null>(null);
+  const roles = draft ?? roleTable.rows;
   const [selectedRoleId, setSelectedRoleId] = useState('admin');
 
   const selectedRole = roles.find((r) => r.id === selectedRoleId) || roles[0];
@@ -80,8 +58,8 @@ export function PhanQuyenPage() {
       return;
     }
 
-    setRoles((prev) =>
-      prev.map((r) => {
+    setDraft(
+      roles.map((r) => {
         if (r.id !== selectedRoleId) return r;
         const has = r.permissions.includes(permId);
         const updated = has
@@ -93,10 +71,19 @@ export function PhanQuyenPage() {
   };
 
   const handleSave = () => {
+    if (draft) roleTable.setRows(draft);
+    setDraft(null);
     toast.success(`Đã lưu thiết lập phân quyền cho vai trò "${selectedRole.name}"`);
   };
 
   const categories = Array.from(new Set(PERMISSIONS.map((p) => p.category)));
+
+  if (!selectedRole)
+    return (
+      <div className="flex-1 flex items-center justify-center py-20">
+        <DataSourceBadge source={roleTable.source} tab="19. PhanQuyen_VaiTro" isLoading={roleTable.isLoading} />
+      </div>
+    );
 
   return (
     <div className="flex flex-col h-page relative space-y-4">
@@ -110,6 +97,9 @@ export function PhanQuyenPage() {
             <h2 className="text-base md:text-lg font-semibold text-foreground">
               Phân quyền & Vai trò truy cập (Role-based Access Control)
             </h2>
+            <div className="mt-1">
+              <DataSourceBadge source={roleTable.source} tab="19. PhanQuyen_VaiTro" isLoading={roleTable.isLoading} isSaving={roleTable.isSaving} />
+            </div>
             <p className="text-sm text-muted-foreground mt-0.5">
               Kiểm soát quyền xem, thêm, sửa, xóa và phê duyệt theo từng cấp bậc trong tổ chức Vũ Gia.
             </p>

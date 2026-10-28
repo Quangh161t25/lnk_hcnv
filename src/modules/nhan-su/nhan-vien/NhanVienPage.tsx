@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import {
   Briefcase,
@@ -28,7 +28,9 @@ import { FormFooter, FormGrid, FormSection } from '@/components/ui/Sections';
 import { formatDate } from '@/lib/format';
 import { useAuthStore } from '@/stores/auth';
 import { useEmployeeStore, type Employee } from '@/stores/employees';
-import { syncEmployeesStoreWithGoogleSheet } from '@/services/googleSheetsAuth';
+import { pullEmployees, pushEmployees } from '@/services/employeesSheet';
+import type { DataSource } from '@/lib/sheetTable';
+import { DataSourceBadge } from '@/components/ui/DataSourceBadge';
 import { useConfirm } from '@/stores/confirm';
 import { toast } from 'sonner';
 
@@ -93,17 +95,43 @@ export default function NhanVienPage() {
   }, [employees, deptFilter, statusFilter, searchTerm]);
 
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [source, setSource] = useState<DataSource | undefined>();
+
+  // Mở trang: lấy danh sách mới nhất từ tab "1. NhanSu_DanhSach".
+  useEffect(() => {
+    pullEmployees()
+      .then(setSource)
+      .catch((e: Error) => {
+        setSource('local');
+        toast.error(`Không tải được danh sách từ Google Sheet: ${e.message}`);
+      });
+  }, []);
 
   const handleSyncSheet = async () => {
     setIsSyncing(true);
     try {
-      await syncEmployeesStoreWithGoogleSheet();
-      toast.success('Đã đồng bộ nhân sự & mật khẩu từ Google Sheet thành công!');
-    } catch {
-      toast.error('Không thể đồng bộ với Google Sheet.');
+      const s = await pullEmployees();
+      setSource(s);
+      if (s === 'sheet') toast.success('Đã tải lại danh sách nhân sự từ Google Sheet');
+      else toast.warning('Chưa kết nối được Google Sheet, đang dùng dữ liệu trên trình duyệt');
+    } catch (e) {
+      toast.error(`Không thể đồng bộ với Google Sheet: ${e instanceof Error ? e.message : e}`);
     } finally {
       setIsSyncing(false);
     }
+  };
+
+  /** Ghi danh sách hiện tại lên Sheet sau mỗi lần thêm/sửa/xóa; lỗi thì tải lại bản thật từ Sheet. */
+  const saveToSheet = () => {
+    if (source !== 'sheet') return;
+    setIsSaving(true);
+    pushEmployees(useEmployeeStore.getState().employees)
+      .catch((e: Error) => {
+        toast.error(`Chưa lưu được lên Google Sheet: ${e.message}`);
+        pullEmployees().catch(() => undefined);
+      })
+      .finally(() => setIsSaving(false));
   };
 
   const handleExport = () => {
@@ -180,6 +208,7 @@ export default function NhanVienPage() {
         ngay_vao_lam: formStartDate,
         mat_khau: formPassword.trim() || '123456',
       });
+      saveToSheet();
       toast.success(`Đã cập nhật hồ sơ nhân viên ${formName.trim()}`);
     } else {
       addEmployee({
@@ -196,6 +225,7 @@ export default function NhanVienPage() {
         mat_khau: formPassword.trim() || '123456',
         avatar_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(formName.trim())}&background=random`,
       });
+      saveToSheet();
       toast.success(`Đã thêm nhân viên ${formName.trim()} vào hệ thống`);
     }
 
@@ -221,6 +251,7 @@ export default function NhanVienPage() {
       cancelText: 'Hủy bỏ',
       onConfirm: () => {
         deleteEmployee(emp.id);
+        saveToSheet();
         toast.success(`Đã xóa nhân viên ${emp.ho_ten} thành công`);
       },
     });
@@ -310,6 +341,7 @@ export default function NhanVienPage() {
           </div>
 
           <div className="flex items-center gap-2">
+            <DataSourceBadge source={source} tab="1. NhanSu_DanhSach" isLoading={!source} isSaving={isSaving} />
             <Button
               size="sm"
               variant="outline"

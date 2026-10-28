@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { apiFetch } from '@/lib/api';
 
 /** Thông tin pháp nhân công ty — lưu ở Google Sheet "16. ThongTin_CongTy" qua /api/company-info. */
 export interface CompanyInfo {
@@ -61,18 +62,7 @@ function writeCache(info: CompanyInfo) {
 }
 
 /** Gọi API; trả null khi không có API (vd. chạy `vite dev` không có serverless function). */
-async function callApi(init?: RequestInit): Promise<Partial<CompanyInfo> | null> {
-  let res: Response;
-  try {
-    res = await fetch(API, { headers: { Accept: 'application/json', 'Content-Type': 'application/json' }, ...init });
-  } catch {
-    return null;
-  }
-  if (!(res.headers.get('content-type') ?? '').includes('application/json')) return null;
-  const body = (await res.json()) as { data?: Partial<CompanyInfo>; error?: string };
-  if (!res.ok) throw new Error(body.error ?? `Lỗi ${res.status}`);
-  return body.data ?? {};
-}
+const callApi = async (init?: RequestInit) => (await apiFetch<{ data?: Partial<CompanyInfo> }>(API, init))?.data ?? null;
 
 /** Giữ các ô trống trên sheet bằng giá trị mặc định để giao diện không bị rỗng. */
 const merge = (...parts: Partial<CompanyInfo>[]) => {

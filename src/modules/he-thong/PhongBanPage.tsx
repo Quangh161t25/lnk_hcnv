@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/Input';
 import { Drawer } from '@/components/ui/Drawer';
 import { useConfirm } from '@/stores/confirm';
 import { toast } from 'sonner';
+import { useSheetTable } from '@/lib/sheetTable';
+import { DataSourceBadge } from '@/components/ui/DataSourceBadge';
 import departmentsSeed from '@/data/departments.json';
 
 interface Department {
@@ -23,7 +25,8 @@ interface Department {
 
 export function PhongBanPage() {
   const confirm = useConfirm();
-  const [departments, setDepartments] = useState<Department[]>(() => departmentsSeed as Department[]);
+  const deptTable = useSheetTable<Department>('departments', departmentsSeed as Department[]);
+  const { rows: departments, setRows: setDepartments } = deptTable;
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
@@ -179,6 +182,10 @@ export function PhongBanPage() {
           </div>
           <p className="mt-2 text-2xl font-bold text-foreground">{stats.level2}</p>
         </div>
+      </div>
+
+      <div className="flex justify-end -mt-1 -mb-1">
+        <DataSourceBadge source={deptTable.source} tab="2. CoCau_PhongBan" isLoading={deptTable.isLoading} isSaving={deptTable.isSaving} />
       </div>
 
       {/* Main Container */}
