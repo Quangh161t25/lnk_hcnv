@@ -64,4 +64,18 @@ export const IMPLEMENTED_MODULES: Record<string, LazyExoticComponent<ComponentTy
   'hanh-chinh/bao-cao-xe': lazy(() => import('./hanh-chinh/quan-ly-xe/BaoCaoXePage')),
   'hanh-chinh/quan-ly-lai-xe': lazy(() => import('./hanh-chinh/quan-ly-xe/QuanLyLaiXePage')),
   'hanh-chinh/thiet-lap-quan-ly-xe': lazy(() => import('./hanh-chinh/quan-ly-xe/ThietLapQuanLyXePage')),
+
+  // === HỆ THỐNG: Sơ đồ tổ chức ===
+  'he-thong/phong-ban': lazy(() => import('./he-thong/PhongBanPage')),
+  'he-thong/cap-bac': lazy(() => import('./he-thong/CapBacPage')),
+  'he-thong/chuc-vu': lazy(() => import('./he-thong/ChucVuPage')),
+  'he-thong/chuc-nang-nhiem-vu': lazy(() => import('./he-thong/ChucNangNhiemVuPage')),
+  'he-thong/nhan-vien': lazy(() => import('./nhan-su/nhan-vien/NhanVienPage')),
+
+  // === HỆ THỐNG: Bảo mật & Cấu hình ===
+  'he-thong/thong-tin-cong-ty': lazy(() => import('./he-thong/ThongTinCongTyPage')),
+  'he-thong/chi-nhanh': lazy(() => import('./he-thong/ChiNhanhPage')),
+  'he-thong/phan-quyen': lazy(() => import('./he-thong/PhanQuyenPage')),
+  'he-thong/sao-luu': lazy(() => import('./he-thong/SaoLuuPage')),
+  'he-thong/thiet-bi-dang-nhap': lazy(() => import('./he-thong/ThietBiDangNhapPage')),
 };

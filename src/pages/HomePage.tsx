@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { ArrowUpRight, Search, type LucideIcon } from 'lucide-react';
 import { t } from '@/lib/i18n';
 import { NAV_ITEMS } from '@/config/navigation';
-import { HANH_CHINH_GROUPS, NHAN_SU_GROUPS } from '@/config/modules';
+import { HANH_CHINH_GROUPS, NHAN_SU_GROUPS, HE_THONG_GROUPS } from '@/config/modules';
 import { useAuthStore } from '@/stores/auth';
 import { useFavoriteModules } from '@/stores/favorites';
 import { Tabs } from '@/components/ui/Tabs';
@@ -56,7 +56,14 @@ export function HomePage() {
   const q = query.trim().toLowerCase();
 
   const functions = NAV_ITEMS.filter((n) => n.path !== '/');
-  const allGroups = useMemo(() => [...toHubGroups('/hanh-chinh', HANH_CHINH_GROUPS), ...toHubGroups('/nhan-su', NHAN_SU_GROUPS)], []);
+  const allGroups = useMemo(
+    () => [
+      ...toHubGroups('/hanh-chinh', HANH_CHINH_GROUPS),
+      ...toHubGroups('/nhan-su', NHAN_SU_GROUPS),
+      ...toHubGroups('/he-thong', HE_THONG_GROUPS),
+    ],
+    []
+  );
   const bookmarked = useMemo(() => {
     const set = new Set(favoriteIds);
     return allGroups.map((g) => ({ ...g, items: g.items.filter((i) => set.has(i.moduleId)) })).filter((g) => g.items.length > 0);

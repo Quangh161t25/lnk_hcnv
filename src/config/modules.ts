@@ -1,7 +1,10 @@
 import {
   Archive,
   ArrowLeftRight,
+  ArrowUpDown,
   Banknote,
+  Briefcase,
+  Building,
   Building2,
   Calculator,
   Calendar,
@@ -16,12 +19,15 @@ import {
   FileText,
   FolderOpen,
   Fuel,
+  ListOrdered,
   Mail,
   MapPin,
+  Monitor,
   Receipt,
   Scale,
   Send,
   Settings,
+  Shield,
   Target,
   UserPlus,
   Users,
@@ -53,6 +59,13 @@ const ns = (slug: string, key: string, icon: LucideIcon, color: string): ModuleD
   slug,
   titleKey: `page.nhanSu.modules.${key}`,
   descKey: `page.nhanSu.descs.${key}`,
+  icon,
+  color,
+});
+const ht = (slug: string, key: string, icon: LucideIcon, color: string): ModuleDef => ({
+  slug,
+  titleKey: `page.systemDashboard.${key}`,
+  descKey: `page.systemDashboard.${key}Desc`,
   icon,
   color,
 });
@@ -149,9 +162,34 @@ export const NHAN_SU_GROUPS: ModuleGroupDef[] = [
   },
 ];
 
+/** Các module con của Hệ thống (Sơ đồ & Bảo mật). */
+export const HE_THONG_GROUPS: ModuleGroupDef[] = [
+  {
+    groupKey: 'page.systemDashboard.orgChartGroup',
+    items: [
+      ht('phong-ban', 'department', Building2, 'bg-indigo-500'),
+      ht('cap-bac', 'jobLevel', ListOrdered, 'bg-orange-500'),
+      ht('chuc-vu', 'position', Briefcase, 'bg-blue-500'),
+      ht('chuc-nang-nhiem-vu', 'functionsTasks', Target, 'bg-sky-500'),
+      ht('nhan-vien', 'employee', Users, 'bg-emerald-500'),
+    ],
+  },
+  {
+    groupKey: 'page.systemDashboard.securityGroup',
+    items: [
+      ht('thong-tin-cong-ty', 'companyInfo', Building, 'bg-violet-500'),
+      ht('chi-nhanh', 'branch', MapPin, 'bg-fuchsia-500'),
+      ht('phan-quyen', 'permission', Shield, 'bg-rose-500'),
+      ht('sao-luu', 'backup', ArrowUpDown, 'bg-cyan-500'),
+      ht('thiet-bi-dang-nhap', 'loginDevices', Monitor, 'bg-teal-500'),
+    ],
+  },
+];
+
 export const MODULE_ROOTS = [
   { base: '/hanh-chinh', labelKey: 'breadcrumb.hanhChinh', groups: HANH_CHINH_GROUPS },
   { base: '/nhan-su', labelKey: 'breadcrumb.nhanSu', groups: NHAN_SU_GROUPS },
+  { base: '/he-thong', labelKey: 'breadcrumb.system', groups: HE_THONG_GROUPS },
 ];
 
 /** Màu icon + nền nhạt theo lớp màu của thẻ module (màu không có trong bảng sẽ về xám, giống bản gốc). */
@@ -169,6 +207,8 @@ const CARD_COLORS: Record<string, { icon: string; bg: string }> = {
   'bg-orange-500': { icon: '#ea580c', bg: 'rgba(234, 88, 12, 0.12)' },
   'bg-red-500': { icon: '#dc2626', bg: 'rgba(220, 38, 38, 0.12)' },
   'bg-slate-500': { icon: '#475569', bg: 'rgba(71, 85, 105, 0.12)' },
+  'bg-sky-500': { icon: '#0284c7', bg: 'rgba(2, 132, 199, 0.12)' },
+  'bg-fuchsia-500': { icon: '#c026d3', bg: 'rgba(192, 38, 211, 0.12)' },
 };
 
 export function cardColors(color: string, primaryHex?: string) {
