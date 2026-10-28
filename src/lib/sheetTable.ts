@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { apiFetch } from './api';
 
 /** Tên bảng phía server (xem api/_lib/tables.js). */
-export type SheetTableName = 'employees' | 'departments' | 'positions' | 'jobLevels' | 'branches' | 'roles';
+export type SheetTableName = 'employees' | 'departments' | 'positions' | 'jobLevels' | 'branches' | 'roles' | 'deadlines';
 
 /** Nơi dữ liệu đang được đọc/ghi: Google Sheet hay bộ nhớ trình duyệt (khi không có API). */
 export type DataSource = 'sheet' | 'local';

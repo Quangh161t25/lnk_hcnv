@@ -8,6 +8,7 @@ import {
   Building2,
   Calculator,
   Calendar,
+  CalendarRange,
   CalendarCheck,
   CalendarDays,
   Car,
@@ -15,6 +16,7 @@ import {
   CircleUser,
   ClipboardCheck,
   ClipboardList,
+  FileChartColumn,
   FilePenLine,
   FileText,
   FolderOpen,
@@ -66,6 +68,14 @@ const ht = (slug: string, key: string, icon: LucideIcon, color: string): ModuleD
   slug,
   titleKey: `page.systemDashboard.${key}`,
   descKey: `page.systemDashboard.${key}Desc`,
+  icon,
+  color,
+});
+
+const bk = (slug: string, key: string, icon: LucideIcon, color: string): ModuleDef => ({
+  slug,
+  titleKey: `page.baoCaoKeHoach.modules.${key}`,
+  descKey: `page.baoCaoKeHoach.descs.${key}`,
   icon,
   color,
 });
@@ -186,9 +196,26 @@ export const HE_THONG_GROUPS: ModuleGroupDef[] = [
   },
 ];
 
+/** Các module con của Báo cáo & Kế hoạch (dùng cho phòng ban và từng nhân viên). */
+export const BAO_CAO_KE_HOACH_GROUPS: ModuleGroupDef[] = [
+  {
+    groupKey: 'page.baoCaoKeHoach.groups.main',
+    items: [
+      bk('ke-hoach', 'keHoach', CalendarRange, 'bg-violet-500'),
+      bk('bao-cao', 'baoCao', FileChartColumn, 'bg-cyan-500'),
+      bk('tinh-hinh-nop', 'tinhHinhNop', ClipboardCheck, 'bg-emerald-500'),
+    ],
+  },
+  {
+    groupKey: 'page.baoCaoKeHoach.groups.settings',
+    items: [bk('thiet-lap', 'thietLap', Settings, 'bg-slate-500')],
+  },
+];
+
 export const MODULE_ROOTS = [
   { base: '/hanh-chinh', labelKey: 'breadcrumb.hanhChinh', groups: HANH_CHINH_GROUPS },
   { base: '/nhan-su', labelKey: 'breadcrumb.nhanSu', groups: NHAN_SU_GROUPS },
+  { base: '/bao-cao-ke-hoach', labelKey: 'breadcrumb.baoCaoKeHoach', groups: BAO_CAO_KE_HOACH_GROUPS },
   { base: '/he-thong', labelKey: 'breadcrumb.system', groups: HE_THONG_GROUPS },
 ];
 

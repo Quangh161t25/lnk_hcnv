@@ -36,6 +36,10 @@ export const IMPLEMENTED_MODULES: Record<string, LazyExoticComponent<ComponentTy
   'hanh-chinh/hom-thu-gop-y': lazy(() => import('./hanh-chinh/cong-luong/HomThuGopYPage')),
 
   // === HÀNH CHÍNH: Tài liệu ===
+  'bao-cao-ke-hoach/bao-cao': lazy(() => import('./bao-cao-ke-hoach/bao-cao/BaoCaoPage')),
+  'bao-cao-ke-hoach/thiet-lap': lazy(() => import('./bao-cao-ke-hoach/thiet-lap/ThietLapPage')),
+  'bao-cao-ke-hoach/tinh-hinh-nop': lazy(() => import('./bao-cao-ke-hoach/tinh-hinh-nop/TinhHinhNopPage')),
+  'bao-cao-ke-hoach/ke-hoach': lazy(() => import('./bao-cao-ke-hoach/ke-hoach/KeHoachPage')),
   'hanh-chinh/danh-sach-tai-lieu': lazy(() => import('./hanh-chinh/tai-lieu/TaiLieuPage')),
   'hanh-chinh/luu-tru-ho-so': lazy(() => import('./hanh-chinh/tai-lieu/LuuTruHoSoPage')),
   'hanh-chinh/thiet-lap-tai-lieu': lazy(() => import('./hanh-chinh/tai-lieu/ThietLapTaiLieuPage')),

@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { ArrowUpRight, Search, type LucideIcon } from 'lucide-react';
 import { t } from '@/lib/i18n';
 import { NAV_ITEMS } from '@/config/navigation';
-import { HANH_CHINH_GROUPS, NHAN_SU_GROUPS, HE_THONG_GROUPS } from '@/config/modules';
+import { BAO_CAO_KE_HOACH_GROUPS, HANH_CHINH_GROUPS, NHAN_SU_GROUPS, HE_THONG_GROUPS } from '@/config/modules';
 import { useAuthStore } from '@/stores/auth';
 import { useFavoriteModules } from '@/stores/favorites';
 import { Tabs } from '@/components/ui/Tabs';
@@ -60,6 +60,7 @@ export function HomePage() {
     () => [
       ...toHubGroups('/hanh-chinh', HANH_CHINH_GROUPS),
       ...toHubGroups('/nhan-su', NHAN_SU_GROUPS),
+      ...toHubGroups('/bao-cao-ke-hoach', BAO_CAO_KE_HOACH_GROUPS),
       ...toHubGroups('/he-thong', HE_THONG_GROUPS),
     ],
     []

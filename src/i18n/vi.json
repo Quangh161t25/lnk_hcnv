@@ -10900,5 +10900,18 @@
   "kho.service.duplicateCode": "Mã kho đã tồn tại",
   "page.nhanSu.groupNhanVien": "Hồ sơ & Nhân sự",
   "page.nhanSu.modules.nhanVien": "Nhân viên",
-  "page.nhanSu.descs.nhanVien": "Quản lý hồ sơ nhân viên, thông tin liên hệ, chức vụ và tài khoản đăng nhập."
+  "page.nhanSu.descs.nhanVien": "Quản lý hồ sơ nhân viên, thông tin liên hệ, chức vụ và tài khoản đăng nhập.",
+  "nav.baoCaoKeHoach": "Báo cáo & Kế hoạch",
+  "breadcrumb.baoCaoKeHoach": "Báo cáo & Kế hoạch",
+  "page.home.baoCaoKeHoachDesc": "Lập kế hoạch và báo cáo công việc của phòng ban và từng nhân viên.",
+  "page.baoCaoKeHoach.groups.main": "Kế hoạch & Báo cáo",
+  "page.baoCaoKeHoach.groups.settings": "Thiết lập",
+  "page.baoCaoKeHoach.modules.keHoach": "Kế hoạch",
+  "page.baoCaoKeHoach.descs.keHoach": "Kế hoạch công việc theo tuần, tháng, quý của phòng ban và cá nhân.",
+  "page.baoCaoKeHoach.modules.baoCao": "Báo cáo",
+  "page.baoCaoKeHoach.descs.baoCao": "Báo cáo kết quả công việc theo tuần, tháng; đối chiếu với kế hoạch.",
+  "page.baoCaoKeHoach.modules.thietLap": "Thiết lập",
+  "page.baoCaoKeHoach.descs.thietLap": "Hạn nộp và người duyệt (trưởng phòng) của từng phòng ban.",
+  "page.baoCaoKeHoach.modules.tinhHinhNop": "Tình hình nộp",
+  "page.baoCaoKeHoach.descs.tinhHinhNop": "Ai đã nộp, nộp muộn hay chưa nộp kế hoạch / báo cáo theo từng kỳ."
 }

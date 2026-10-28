@@ -49,6 +49,8 @@ export const TABLES = {
       { key: 'duong_dan', header: 'Cấu trúc phân cấp' },
       { key: 'trang_thai', header: 'Trạng thái' },
       { key: 'thu_tu', header: 'Thứ tự sắp xếp', ...num },
+      // Người duyệt kế hoạch/báo cáo của phòng này (và các nhóm con).
+      { key: 'truong_phong', header: 'Trưởng phòng (Mã NV)' },
     ],
     afterRead(row) {
       const parts = String(row.duong_dan || '').split('/').filter(Boolean);
@@ -119,6 +121,119 @@ export const TABLES = {
       { key: 'permissions', header: 'Danh sách quyền (mã quyền, cách nhau dấu phẩy)', ...list },
     ],
   },
+};
+
+/* ---------- Thiết lập hạn nộp Kế hoạch / Báo cáo (đọc: mọi người đã đăng nhập; ghi: quản trị viên) ---------- */
+
+TABLES.deadlines = {
+  tab: '24. BCKH_HanNop',
+  idKey: 'id',
+  columns: [
+    { key: 'id', header: 'Mã' },
+    { key: 'ten', header: 'Áp dụng cho' },
+    // Hạn nộp = (ngày đầu kỳ hoặc ngày cuối kỳ) + số ngày lệch, lúc "Giờ".
+    { key: 'moc', header: 'Mốc (Đầu kỳ/Cuối kỳ)', read: (v) => (/đầu|dau/i.test(String(v)) ? 'dau_ky' : 'cuoi_ky'), write: (v) => (v === 'dau_ky' ? 'Đầu kỳ' : 'Cuối kỳ') },
+    { key: 'lech_ngay', header: 'Lệch ngày (âm = trước mốc)', ...num },
+    { key: 'gio', header: 'Giờ (HH:mm)' },
+    { key: 'bat_buoc_ca_nhan', header: 'Bắt buộc nhân viên (Có/Không)', ...bool },
+    { key: 'bat_buoc_phong_ban', header: 'Bắt buộc phòng ban (Có/Không)', ...bool },
+    { key: 'ghi_chu', header: 'Ghi chú' },
+  ],
+};
+
+/* ---------- Kế hoạch (đọc/ghi qua /api/plans, có phân quyền theo từng dòng) ---------- */
+
+export const PLAN_TABLES = {
+  plans: {
+    tab: '20. KeHoach_DanhSach',
+    idKey: 'id',
+    columns: [
+      { key: 'id', header: 'Mã kế hoạch' },
+      { key: 'tieu_de', header: 'Tiêu đề' },
+      { key: 'loai', header: 'Loại', read: (v) => (/phòng|phong/i.test(String(v)) ? 'phong_ban' : 'ca_nhan'), write: (v) => (v === 'phong_ban' ? 'Phòng ban' : 'Cá nhân') },
+      {
+        key: 'loai_ky',
+        header: 'Kỳ',
+        read: (v) => (/quý|quy/i.test(String(v)) ? 'quy' : /tháng|thang/i.test(String(v)) ? 'thang' : 'tuan'),
+        write: (v) => (v === 'quy' ? 'Quý' : v === 'thang' ? 'Tháng' : 'Tuần'),
+      },
+      { key: 'nam', header: 'Năm', ...num },
+      { key: 'so_ky', header: 'Số kỳ (tuần/tháng/quý)', ...num },
+      { key: 'tu_ngay', header: 'Từ ngày' },
+      { key: 'den_ngay', header: 'Đến ngày' },
+      { key: 'phong_ban_id', header: 'Mã phòng ban', ref: { table: 'departments', code: 'ma_phong_ban', name: 'ten_phong_ban', nameKey: 'ten_phong_ban' } },
+      { key: 'nguoi_lap', header: 'Người lập (Mã NV)' },
+      { key: 'ten_nguoi_lap', header: 'Họ tên người lập' },
+      { key: 'muc_tieu', header: 'Mục tiêu chung' },
+      { key: 'trang_thai', header: 'Trạng thái' },
+      { key: 'nguoi_duyet', header: 'Người duyệt (Mã NV)' },
+      { key: 'y_kien_duyet', header: 'Ý kiến duyệt' },
+      { key: 'tg_gui', header: 'Gửi lúc' },
+      { key: 'tg_duyet', header: 'Duyệt lúc' },
+      { key: 'tg_tao', header: 'Tạo lúc' },
+      { key: 'tg_cap_nhat', header: 'Cập nhật lúc' },
+    ],
+  },
+  planItems: {
+    tab: '21. KeHoach_ChiTiet',
+    idKey: 'id',
+    columns: [
+      { key: 'ke_hoach_id', header: 'Mã kế hoạch' },
+      { key: 'stt', header: 'STT', ...num },
+      { key: 'ten_viec', header: 'Tên đầu việc' },
+      { key: 'muc_tieu', header: 'Mục tiêu / Chỉ số' },
+      { key: 'phu_trach', header: 'Người phụ trách (Mã NV)' },
+      { key: 'han', header: 'Thời hạn' },
+      { key: 'uu_tien', header: 'Ưu tiên' },
+      { key: 'trong_so', header: 'Trọng số (%)', ...num },
+      { key: 'ghi_chu', header: 'Ghi chú' },
+      { key: 'id', header: 'Mã đầu việc' },
+      { key: 'nguon_id', header: 'Nhận từ đầu việc (Mã)' },
+    ],
+  },
+};
+
+/* ---------- Báo cáo (đọc/ghi qua /api/reports) ---------- */
+
+const SECTION = { A: 'A. Kết quả công việc', B: 'B. Vấn đề & biện pháp', C: 'C. Kế hoạch kỳ tiếp theo', D: 'D. Đề xuất cải tiến' };
+// Cột chung của tài liệu có luồng duyệt (dùng lại cho báo cáo).
+const docColumns = (idHeader) => [
+  { key: 'id', header: idHeader },
+  ...PLAN_TABLES.plans.columns.filter((c) => !['id', 'muc_tieu'].includes(c.key) && !c.header.startsWith('Kỳ')),
+];
+
+PLAN_TABLES.reports = {
+  tab: '22. BaoCao_DanhSach',
+  idKey: 'id',
+  columns: [
+    ...docColumns('Mã báo cáo').slice(0, 3),
+    { key: 'loai_ky', header: 'Kỳ', read: (v) => (/tháng|thang/i.test(String(v)) ? 'thang' : 'tuan'), write: (v) => (v === 'thang' ? 'Tháng' : 'Tuần') },
+    ...docColumns('Mã báo cáo').slice(3, 10),
+    { key: 'ke_hoach_id', header: 'Kế hoạch đối chiếu (Mã)' },
+    { key: 'phan_tram', header: '% hoàn thành', ...num },
+    { key: 'tom_tat', header: 'Tóm tắt / Nhận xét chung' },
+    ...docColumns('Mã báo cáo').slice(10),
+  ],
+};
+
+PLAN_TABLES.reportItems = {
+  tab: '23. BaoCao_ChiTiet',
+  idKey: 'id',
+  columns: [
+    { key: 'bao_cao_id', header: 'Mã báo cáo' },
+    { key: 'phan', header: 'Phần', read: (v) => String(v).trim().charAt(0).toUpperCase() || 'A', write: (v) => SECTION[v] ?? v },
+    { key: 'stt', header: 'STT', ...num },
+    { key: 'noi_dung', header: 'Nội dung (việc / vấn đề / đầu việc / đề xuất)' },
+    { key: 'ket_qua', header: 'Kết quả / Biện pháp / Mục tiêu / Trình bày' },
+    { key: 'phan_tram', header: '% hoàn thành', ...num },
+    { key: 'trong_so', header: 'Trọng số (%)', ...num },
+    { key: 'phu_trach', header: 'Người phụ trách (Mã NV)' },
+    { key: 'han', header: 'Thời hạn' },
+    { key: 'da_xu_ly', header: 'Đã xử lý (Có/Không)', ...bool },
+    { key: 'ghi_chu', header: 'Ghi chú' },
+    { key: 'nguon_id', header: 'Từ đầu việc kế hoạch (Mã)' },
+    { key: 'id', header: 'Mã dòng' },
+  ],
 };
 
 /** Chuyển các dòng giá trị (dòng 0 là tiêu đề) thành mảng đối tượng. */

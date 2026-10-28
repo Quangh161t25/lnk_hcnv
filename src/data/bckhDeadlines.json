@@ -1,0 +1,7 @@
+[
+  { "id": "bc_tuan", "ten": "Báo cáo tuần", "moc": "cuoi_ky", "lech_ngay": -2, "gio": "17:00", "bat_buoc_ca_nhan": true, "bat_buoc_phong_ban": true, "ghi_chu": "Nộp trước 17h thứ Sáu của tuần báo cáo" },
+  { "id": "bc_thang", "ten": "Báo cáo tháng", "moc": "cuoi_ky", "lech_ngay": 3, "gio": "17:00", "bat_buoc_ca_nhan": false, "bat_buoc_phong_ban": true, "ghi_chu": "Nộp trong 3 ngày đầu tháng sau" },
+  { "id": "kh_tuan", "ten": "Kế hoạch tuần", "moc": "dau_ky", "lech_ngay": 0, "gio": "10:00", "bat_buoc_ca_nhan": true, "bat_buoc_phong_ban": true, "ghi_chu": "Nộp trước 10h thứ Hai đầu tuần" },
+  { "id": "kh_thang", "ten": "Kế hoạch tháng", "moc": "dau_ky", "lech_ngay": 2, "gio": "17:00", "bat_buoc_ca_nhan": false, "bat_buoc_phong_ban": true, "ghi_chu": "Nộp trong 2 ngày đầu tháng" },
+  { "id": "kh_quy", "ten": "Kế hoạch quý", "moc": "dau_ky", "lech_ngay": 5, "gio": "17:00", "bat_buoc_ca_nhan": false, "bat_buoc_phong_ban": true, "ghi_chu": "Nộp trong 5 ngày đầu quý" }
+]

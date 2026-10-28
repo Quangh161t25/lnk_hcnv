@@ -1,9 +1,12 @@
 // Đọc/ghi một bảng (kèm chuyển đổi cột tham chiếu và cột bí mật).
-import { TABLES, objectsToRows, rowsToObjects } from './tables.js';
+import { PLAN_TABLES, TABLES, objectsToRows, rowsToObjects } from './tables.js';
+
+// /api/table chỉ được dùng TABLES; các bảng có quy tắc riêng (kế hoạch) nằm trong PLAN_TABLES.
+const ALL = { ...TABLES, ...PLAN_TABLES };
 import { readMany, readValues, replaceValues } from './google.js';
 
 export async function loadRaw(name) {
-  const def = TABLES[name];
+  const def = ALL[name];
   return rowsToObjects(def, await readValues(def.tab));
 }
 
@@ -11,14 +14,14 @@ export async function loadRaw(name) {
 async function refMaps(def) {
   const refs = def.columns.filter((x) => x.ref);
   if (!refs.length) return {};
-  const values = await readMany(refs.map((c) => TABLES[c.ref.table].tab));
+  const values = await readMany(refs.map((c) => ALL[c.ref.table].tab));
   const maps = {};
-  for (const c of refs) maps[c.key] = { rows: rowsToObjects(TABLES[c.ref.table], values[TABLES[c.ref.table].tab]), ...c.ref };
+  for (const c of refs) maps[c.key] = { rows: rowsToObjects(ALL[c.ref.table], values[ALL[c.ref.table].tab]), ...c.ref };
   return maps;
 }
 
 export async function loadTable(name, { includeSecrets = false } = {}) {
-  const def = TABLES[name];
+  const def = ALL[name];
   const rows = await loadRaw(name);
   const maps = await refMaps(def);
   return rows.map((r) => {
@@ -34,7 +37,7 @@ export async function loadTable(name, { includeSecrets = false } = {}) {
 }
 
 export async function saveTable(name, rows) {
-  const def = TABLES[name];
+  const def = ALL[name];
   const maps = await refMaps(def);
   let prepared = rows.map((r) => {
     const out = { ...r };

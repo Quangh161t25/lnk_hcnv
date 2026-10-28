@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/Input';
 import { Drawer } from '@/components/ui/Drawer';
 import { useConfirm } from '@/stores/confirm';
 import { toast } from 'sonner';
+import { useEmployeeStore } from '@/stores/employees';
 import { useSheetTable } from '@/lib/sheetTable';
 import { DataSourceBadge } from '@/components/ui/DataSourceBadge';
 import departmentsSeed from '@/data/departments.json';
@@ -19,6 +20,8 @@ interface Department {
   duong_dan?: string;
   trang_thai: string;
   thu_tu?: number;
+  /** Mã NV trưởng phòng — người duyệt kế hoạch/báo cáo của phòng (và nhóm con). */
+  truong_phong?: string;
   tg_tao?: string;
   tg_cap_nhat?: string;
 }
@@ -39,7 +42,9 @@ export function PhongBanPage() {
     cap_do: 1,
     cha_id: '',
     trang_thai: 'Đang hoạt động',
+    truong_phong: '',
   });
+  const employees = useEmployeeStore((s) => s.employees);
 
   const filtered = useMemo(() => {
     return departments.filter((d) => {
@@ -69,6 +74,7 @@ export function PhongBanPage() {
       cap_do: 1,
       cha_id: '',
       trang_thai: 'Đang hoạt động',
+      truong_phong: '',
     });
     setDrawerOpen(true);
   };
@@ -81,6 +87,7 @@ export function PhongBanPage() {
       cap_do: dept.cap_do,
       cha_id: dept.cha_id || '',
       trang_thai: dept.trang_thai,
+      truong_phong: dept.truong_phong ?? '',
     });
     setDrawerOpen(true);
   };
@@ -113,6 +120,7 @@ export function PhongBanPage() {
         cap_do: Number(formData.cap_do),
         cha_id: formData.cha_id || null,
         trang_thai: formData.trang_thai,
+        truong_phong: formData.truong_phong,
         tg_tao: new Date().toISOString(),
         tg_cap_nhat: new Date().toISOString(),
       };
@@ -362,6 +370,22 @@ export function PhongBanPage() {
                       {d.ten_phong_ban} ({d.ma_phong_ban})
                     </option>
                   ))}
+              </select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-foreground">Trưởng phòng (người duyệt kế hoạch / báo cáo)</label>
+              <select
+                value={formData.truong_phong}
+                onChange={(e) => setFormData({ ...formData, truong_phong: e.target.value })}
+                className="w-full h-9 px-3 rounded-md border border-input bg-card text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              >
+                <option value="">(Chưa chỉ định)</option>
+                {employees.map((e) => (
+                  <option key={e.ma_nv} value={e.ma_nv}>
+                    {e.ho_ten} ({e.ma_nv})
+                  </option>
+                ))}
               </select>
             </div>
 
