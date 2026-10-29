@@ -28,6 +28,7 @@ export default workflowHandler({
   items: 'reportItems',
   itemKey: 'bao_cao_id',
   idPrefix: 'BC',
+  module: 'bao-cao-ke-hoach/bao-cao',
   noun: 'báo cáo',
   periods: ['tuan', 'thang'],
   docFields: (input) => ({ tom_tat: clip(input.tom_tat, 3000), ke_hoach_id: clip(input.ke_hoach_id, 60) }),

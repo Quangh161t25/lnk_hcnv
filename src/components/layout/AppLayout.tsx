@@ -8,6 +8,8 @@ import { cn } from '@/lib/utils';
 import { t } from '@/lib/i18n';
 import { NAV_ITEMS } from '@/config/navigation';
 import { useUiStore } from '@/stores/ui';
+import { MODULE_ROOTS } from '@/config/modules';
+import { usePermissions } from '@/lib/permissions';
 import { useAuthStore } from '@/stores/auth';
 import { Button } from '@/components/ui/Button';
 import { Breadcrumb } from './Breadcrumb';
@@ -39,6 +41,12 @@ function avatarUrl(name: string) {
 export function AppLayout({ children }: { children: ReactNode }) {
   const { user, logout } = useAuthStore();
   const { sidebarOpen, toggleSidebar } = useUiStore();
+  // Ẩn phân hệ mà người dùng không xem được module nào (Hệ thống › Phân quyền).
+  const { can } = usePermissions();
+  const navItems = NAV_ITEMS.filter((item) => {
+    const root = MODULE_ROOTS.find((r) => r.base === item.path);
+    return !root || root.groups.some((g) => g.items.some((m) => can(`${root.base}/${m.slug}`, 'xem')));
+  });
   const location = useLocation();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -133,7 +141,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
         <div className="flex-1 min-h-0 flex flex-col py-3 relative">
           <div className="flex-1 overflow-y-auto no-scrollbar min-h-0">
             <nav className="px-2 space-y-1" aria-label={t('nav.mainNav')}>
-              {NAV_ITEMS.map((item) => {
+              {navItems.map((item) => {
                 const name = t(item.nameKey);
                 const Icon = item.icon;
                 return (

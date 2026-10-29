@@ -9,6 +9,7 @@
 import { randomBytes } from 'node:crypto';
 import { loadRaw, loadTable, saveTable } from './store.js';
 import { readBody, readSession, route } from './google.js';
+import { permChecker } from './permissions.js';
 
 export const STATUS = { draft: 'Nháp', sent: 'Đã gửi', approved: 'Đã duyệt', returned: 'Trả lại' };
 const EDITABLE = new Set([STATUS.draft, STATUS.returned]);
@@ -85,6 +86,9 @@ export function workflowHandler(cfg) {
   return route(async (req, res) => {
     const session = readSession(req);
     if (!session) return res.status(401).json({ error: 'Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại' });
+    // Quyền module (tab 25) áp thêm lên quy tắc theo từng dòng bên dưới.
+    const can = await permChecker(session);
+    if (!can(cfg.module, 'xem')) return res.status(403).json({ error: `Bạn không có quyền xem ${noun}` });
     const ctx = await context(session);
 
     if (req.method === 'GET') return res.status(200).json(view(ctx, session));
@@ -101,6 +105,7 @@ export function workflowHandler(cfg) {
       const input = body.doc ?? body.plan ?? {};
       const existing = input.id ? find(input.id) : null;
       if (input.id && !existing) return fail(404, `Không tìm thấy ${noun}`);
+      if (!can(cfg.module, existing ? 'sua' : 'them')) return fail(403, `Bạn không có quyền ${existing ? 'sửa' : 'thêm'} ${noun}`);
       if (existing && !ctx.canEdit(existing)) return fail(403, `Chỉ người lập được sửa, và chỉ khi ${noun} còn Nháp hoặc bị Trả lại`);
 
       const loai = input.loai === 'phong_ban' ? 'phong_ban' : 'ca_nhan';
@@ -160,6 +165,7 @@ export function workflowHandler(cfg) {
         tg_cap_nhat: now(),
       });
     } else if (body.action === 'delete') {
+      if (!can(cfg.module, 'xoa')) return fail(403, `Bạn không có quyền xóa ${noun}`);
       if (!ctx.isAdmin && !(ctx.mine(doc) && EDITABLE.has(doc.trang_thai))) return fail(403, `Chỉ xóa được ${noun} của mình khi còn Nháp hoặc bị Trả lại`);
       ctx.docs = ctx.docs.filter((d) => d.id !== doc.id);
       ctx.items = ctx.items.filter((i) => i[cfg.itemKey] !== doc.id);

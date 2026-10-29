@@ -5,6 +5,7 @@ import { MAX_COLUMN_WIDTH, type ColumnDef, type SortDirection, type SortState } 
 import { Button } from '@/components/ui/Button';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { EmptyState, Spinner } from '@/components/ui/Feedback';
+import { useModulePerm } from '@/lib/permissions';
 
 const PAGE_SIZES = [10, 20, 30, 50, 100];
 const PAGE_SIZE_ACCENTS = ['border-l-emerald-400', 'border-l-sky-400', 'border-l-violet-400', 'border-l-amber-400', 'border-l-rose-400', 'border-l-fuchsia-400'];
@@ -154,7 +155,7 @@ export function DataTable<T>({
   onPageSizeChange,
   sort,
   onSort,
-  renderCell,
+  renderCell: renderCellRaw,
   renderMobileCard,
   onRowClick,
   keyExtractor,
@@ -167,6 +168,9 @@ export function DataTable<T>({
   emptyAction,
   renderSummaryRow,
 }: DataTableProps<T>) {
+  // Cột thao tác trống khi không có quyền Sửa lẫn Xóa trên module đang mở.
+  const perm = useModulePerm();
+  const renderCell = (col: string, row: T) => (col === 'actions' && !perm.sua && !perm.xoa ? null : renderCellRaw(col, row));
   const visible = useMemo(() => [...columns].filter((c) => c.visible).sort((a, b) => (a.order ?? 0) - (b.order ?? 0)), [columns]);
   const dataCols = useMemo(() => visible.filter((c) => c.id !== 'actions'), [visible]);
   const tableMinWidth = useMemo(

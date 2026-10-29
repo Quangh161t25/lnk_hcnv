@@ -11,6 +11,7 @@ export default workflowHandler({
   items: 'planItems',
   itemKey: 'ke_hoach_id',
   idPrefix: 'KH',
+  module: 'bao-cao-ke-hoach/ke-hoach',
   noun: 'kế hoạch',
   periods: ['tuan', 'thang', 'quy'],
   assigneeKey: 'phu_trach',

@@ -1,7 +1,8 @@
 // Vercel Serverless Function: đọc / ghi "Thông tin công ty" vào Google Sheet.
 // Tab dữ liệu: "16. ThongTin_CongTy", dạng 3 cột: Khóa | Trường | Giá trị.
-// GET: ai cũng đọc được (tên, địa chỉ công ty hiển thị trên giao diện). PUT: chỉ quản trị viên.
+// GET: ai cũng đọc được (tên, địa chỉ công ty hiển thị trên giao diện). PUT: quản trị viên hoặc người có quyền Sửa module Thông tin công ty.
 import { readBody, readSession, readValues, replaceValues, route } from './_lib/google.js';
+import { permChecker } from './_lib/permissions.js';
 
 const SHEET_TITLE = '16. ThongTin_CongTy';
 
@@ -45,7 +46,7 @@ export default route(async (req, res) => {
   if (req.method === 'PUT' || req.method === 'POST') {
     const session = readSession(req);
     if (!session) return res.status(401).json({ error: 'Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại' });
-    if (session.role !== 'admin') return res.status(403).json({ error: 'Chỉ quản trị viên mới được sửa thông tin công ty' });
+    if (!(await permChecker(session))('he-thong/thong-tin-cong-ty', 'sua')) return res.status(403).json({ error: 'Bạn không có quyền sửa thông tin công ty' });
     const body = readBody(req);
     const info = {};
     for (const k of KEYS) info[k] = typeof body[k] === 'string' ? body[k].slice(0, 500) : '';

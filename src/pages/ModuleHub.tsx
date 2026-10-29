@@ -10,6 +10,7 @@ import { primaryHex, useUiStore } from '@/stores/ui';
 import { Tabs } from '@/components/ui/Tabs';
 import { EmptyState } from '@/components/ui/Feedback';
 import { PageHeaderBar } from '@/components/data/PageHeaderBar';
+import { usePermissions } from '@/lib/permissions';
 
 export interface HubItem {
   title: string;
@@ -94,7 +95,10 @@ export function ModuleCard({ title, description, icon: Icon, color, moduleId }: 
 }
 
 /** Danh sách nhóm module dạng lưới. */
-export function ModuleGroupsGrid({ groups }: { groups: HubGroup[] }) {
+export function ModuleGroupsGrid({ groups: all }: { groups: HubGroup[] }) {
+  // Ẩn module không có quyền Xem (Hệ thống › Phân quyền).
+  const { can } = usePermissions();
+  const groups = all.map((g) => ({ ...g, items: g.items.filter((i) => can(i.moduleId, 'xem')) })).filter((g) => g.items.length > 0);
   return (
     <>
       {groups.map((g, gi) => (

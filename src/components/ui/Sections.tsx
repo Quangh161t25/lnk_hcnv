@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { t } from '@/lib/i18n';
 import { Button } from './Button';
 import { EmptyState } from './Feedback';
+import { useModulePerm } from '@/lib/permissions';
 
 interface SectionProps {
   title: ReactNode;
@@ -102,12 +103,14 @@ export function FormFooter({
   cancelLabel?: string;
   createIcon?: ReactNode;
 }) {
+  const perm = useModulePerm();
+  const allowed = isEdit ? perm.sua : perm.them;
   return (
     <div className="flex items-center justify-between w-full gap-3">
       <Button variant="outline" onClick={onCancel} className="border-border text-muted-foreground">
         {cancelLabel ?? t('common.cancel')}
       </Button>
-      <Button type="submit" form={formId} isLoading={isLoading} className="bg-primary text-white shadow-lg">
+      <Button type="submit" form={formId} isLoading={isLoading} disabled={!allowed} title={allowed ? undefined : 'Bạn không có quyền lưu trong module này'} className="bg-primary text-white shadow-lg">
         {isEdit ? (
           <>
             <Save className="mr-2 h-4 w-4" /> {saveLabel ?? t('common.save')}
@@ -124,16 +127,19 @@ export function FormFooter({
 
 /** Chân trang chi tiết: Đóng | Sửa, Xóa. */
 export function DetailFooter({ onClose, onEdit, onDelete }: { onClose: () => void; onEdit: () => void; onDelete?: () => void }) {
+  const perm = useModulePerm();
   return (
     <div className="flex items-center justify-between w-full">
       <Button variant="ghost" onClick={onClose} className="text-muted-foreground hover:text-foreground border border-border">
         {t('common.close')}
       </Button>
       <div className="flex items-center gap-3">
-        <Button onClick={onEdit} className="bg-primary text-white shadow-lg hover:bg-primary/90">
-          <SquarePen size={16} className="mr-2" /> {t('common.edit')}
-        </Button>
-        {onDelete && (
+        {perm.sua && (
+          <Button onClick={onEdit} className="bg-primary text-white shadow-lg hover:bg-primary/90">
+            <SquarePen size={16} className="mr-2" /> {t('common.edit')}
+          </Button>
+        )}
+        {onDelete && perm.xoa && (
           <Button
             variant="ghost"
             onClick={onDelete}

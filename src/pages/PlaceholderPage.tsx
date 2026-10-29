@@ -3,9 +3,22 @@ import { ArrowLeft, Puzzle, type LucideIcon } from 'lucide-react';
 import { t } from '@/lib/i18n';
 
 /** Trang "Sắp ra mắt" cho các phân hệ/module chưa dựng lại. */
-export function PlaceholderPage({ title, icon: Icon = Puzzle, backTo = '/', backLabel }: { title?: string; icon?: LucideIcon; backTo?: string; backLabel?: string }) {
+export function PlaceholderPage({
+  title,
+  icon: Icon = Puzzle,
+  backTo = '/',
+  backLabel,
+  description: custom,
+}: {
+  title?: string;
+  icon?: LucideIcon;
+  backTo?: string;
+  backLabel?: string;
+  /** Thay nội dung mặc định "Sắp ra mắt" (vd. thông báo không có quyền). */
+  description?: string;
+}) {
   const heading = title ?? t('page.placeholder.title');
-  const description = title ? t('page.placeholder.descriptionWithModule', { name: title }) : t('page.placeholder.description');
+  const description = custom ? custom : title ? t('page.placeholder.descriptionWithModule', { name: title }) : t('page.placeholder.description');
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-120px)] p-6 placeholder-bg-grid bg-muted/30">
       <div className="max-w-2xl w-full text-center">

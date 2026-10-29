@@ -193,6 +193,28 @@ export const PLAN_TABLES = {
   },
 };
 
+/* ---------- Phân quyền theo nhân viên × module (đọc/ghi qua /api/permissions) ---------- */
+
+PLAN_TABLES.permissions = {
+  tab: '25. PhanQuyen_NhanVien',
+  idKey: 'id',
+  columns: [
+    // "*" = mặc định cho mọi nhân viên chưa được cấu hình riêng.
+    { key: 'ma_nv', header: 'Mã NV (* = mặc định)' },
+    { key: 'ho_ten', header: 'Họ tên' },
+    { key: 'module', header: 'Mã module' },
+    { key: 'ten_module', header: 'Tên module' },
+    { key: 'xem', header: 'Xem', ...bool },
+    { key: 'them', header: 'Thêm', ...bool },
+    { key: 'sua', header: 'Sửa', ...bool },
+    { key: 'xoa', header: 'Xóa', ...bool },
+  ],
+  afterRead(row) {
+    row.id = `${String(row.ma_nv).toLowerCase()}|${row.module}`;
+    return row;
+  },
+};
+
 /* ---------- Báo cáo (đọc/ghi qua /api/reports) ---------- */
 
 const SECTION = { A: 'A. Kết quả công việc', B: 'B. Vấn đề & biện pháp', C: 'C. Kế hoạch kỳ tiếp theo', D: 'D. Đề xuất cải tiến' };

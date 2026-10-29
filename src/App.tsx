@@ -13,6 +13,7 @@ import { PlaceholderPage } from '@/pages/PlaceholderPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { AiAssistantPage } from '@/pages/AiAssistantPage';
 import { useAuthStore } from '@/stores/auth';
+import { ModulePermissionScope, usePermissions } from '@/lib/permissions';
 
 const PAGE_FALLBACK = (
   <div className="flex-1 flex items-center justify-center py-20">
@@ -32,15 +33,32 @@ type Section = 'hanh-chinh' | 'nhan-su' | 'bao-cao-ke-hoach' | 'he-thong';
 
 function SubModuleRoute({ section, groups }: { section: Section; groups: ModuleGroupDef[] }) {
   const { moduleId = '' } = useParams();
-  const Page = IMPLEMENTED_MODULES[`${section}/${moduleId}`];
-  if (Page) {
+  const key = `${section}/${moduleId}`;
+  const Page = IMPLEMENTED_MODULES[key];
+  const def = findModule(groups, moduleId);
+  const { can, isLoading } = usePermissions();
+  if (isLoading) return PAGE_FALLBACK;
+  // Không có quyền Xem (kể cả khi gõ thẳng đường dẫn).
+  if (!can(key, 'xem')) {
     return (
-      <Suspense fallback={PAGE_FALLBACK}>
-        <Page />
-      </Suspense>
+      <PlaceholderPage
+        title={def ? t(def.titleKey) : undefined}
+        icon={def?.icon}
+        description="Bạn không có quyền truy cập module này. Liên hệ quản trị viên để được cấp quyền (Hệ thống › Phân quyền)."
+        backTo={`/${section}`}
+        backLabel={t(MODULE_ROOTS.find((r) => r.base === `/${section}`)?.labelKey ?? 'breadcrumb.system')}
+      />
     );
   }
-  const def = findModule(groups, moduleId);
+  if (Page) {
+    return (
+      <ModulePermissionScope perm={{ xem: true, them: can(key, 'them'), sua: can(key, 'sua'), xoa: can(key, 'xoa') }}>
+        <Suspense fallback={PAGE_FALLBACK}>
+          <Page />
+        </Suspense>
+      </ModulePermissionScope>
+    );
+  }
   return (
     <PlaceholderPage
       title={def ? t(def.titleKey) : undefined}

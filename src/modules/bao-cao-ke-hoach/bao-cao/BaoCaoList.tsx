@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { MultiSelectFilter } from '@/components/ui/MultiSelectFilter';
 import { DataSourceBadge } from '@/components/ui/DataSourceBadge';
+import { useModulePerm } from '@/lib/permissions';
 import { ListToolbar } from '@/components/data/ListToolbar';
 import { DataTable } from '@/components/data/DataTable';
 import type { FilterGroup } from '@/components/data/MobileFilterSheet';
@@ -51,6 +52,8 @@ const sortValue = (r: Report, col: string): string | number =>
 
 /** Tab "Danh sách" của Báo cáo. */
 export function BaoCaoList({ reports, isLoading, source, onAdd, onView, onEdit, onDelete }: { reports: Report[]; isLoading: boolean; source?: DataSource; onAdd: () => void; onView: (r: Report) => void; onEdit: (r: Report) => void; onDelete: (r: Report) => void }) {
+  // Ẩn nút Lập báo cáo khi không có quyền Thêm (Hệ thống › Phân quyền).
+  const perm = useModulePerm();
   const list = useBaoCaoList();
   const { searchTerm, filters, sort, setFilter, resetState, selectedIds, clearSelection } = list;
   useEffect(() => () => resetState(), [resetState]);
@@ -171,10 +174,12 @@ export function BaoCaoList({ reports, isLoading, source, onAdd, onView, onEdit, 
             <span className="hidden md:inline-flex">
               <DataSourceBadge source={source} tab="22. BaoCao_DanhSach" isLoading={isLoading} />
             </span>
-            <Button onClick={onAdd} size="sm" className="bg-primary text-white hover:bg-primary/90 shadow-md shadow-primary/20 h-9 px-3 sm:px-4">
-              <Plus className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-2" />
-              <span className="hidden sm:inline">Lập báo cáo</span>
-            </Button>
+            {perm.them && (
+              <Button onClick={onAdd} size="sm" className="bg-primary text-white hover:bg-primary/90 shadow-md shadow-primary/20 h-9 px-3 sm:px-4">
+                <Plus className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Lập báo cáo</span>
+              </Button>
+            )}
           </div>
         }
         filters={

@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { t } from '@/lib/i18n';
 import type { ColumnDef } from '@/stores/createListStore';
 import { Tooltip } from '@/components/ui/Tooltip';
+import { useModulePerm } from '@/lib/permissions';
 import { ColumnSettings } from './ColumnSettings';
 import { MobileFilterSheet, type FilterGroup } from './MobileFilterSheet';
 
@@ -43,8 +44,8 @@ export function ListToolbar({
   actions,
   bulkActions,
   filters,
-  onDeleteMany,
-  onStatusChangeMany,
+  onDeleteMany: onDeleteManyRaw,
+  onStatusChangeMany: onStatusChangeManyRaw,
   columns,
   onToggleColumn,
   onReorderColumns,
@@ -56,9 +57,14 @@ export function ListToolbar({
   activeFilterCount = 0,
   onClearAllFilters,
   filterGroups,
-  onAdd,
+  onAdd: onAddRaw,
   searchTrailing,
 }: ListToolbarProps) {
+  // Ẩn Thêm / Xóa nhiều / Đổi trạng thái khi không có quyền trên module đang mở.
+  const perm = useModulePerm();
+  const onAdd = perm.them ? onAddRaw : undefined;
+  const onDeleteMany = perm.xoa ? onDeleteManyRaw : undefined;
+  const onStatusChangeMany = perm.sua ? onStatusChangeManyRaw : undefined;
   const navigate = useNavigate();
   const placeholder = searchPlaceholder ?? t('common.searchPlaceholder');
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);

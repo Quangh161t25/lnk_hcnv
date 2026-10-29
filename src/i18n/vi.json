@@ -10913,5 +10913,6 @@
   "page.baoCaoKeHoach.modules.thietLap": "Thiết lập",
   "page.baoCaoKeHoach.descs.thietLap": "Hạn nộp và người duyệt (trưởng phòng) của từng phòng ban.",
   "page.baoCaoKeHoach.modules.tinhHinhNop": "Tình hình nộp",
-  "page.baoCaoKeHoach.descs.tinhHinhNop": "Ai đã nộp, nộp muộn hay chưa nộp kế hoạch / báo cáo theo từng kỳ."
+  "page.baoCaoKeHoach.descs.tinhHinhNop": "Ai đã nộp, nộp muộn hay chưa nộp kế hoạch / báo cáo theo từng kỳ.",
+  "breadcrumb.system": "Hệ thống"
 }
