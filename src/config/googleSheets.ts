@@ -16,7 +16,6 @@ export const GOOGLE_SHEETS_CONFIG = {
     '8. TuyenDung_UngVien',
     '9. TaiLieu_CongVan',
     '10. QuanLy_TaiSan',
-    '11. QuanLy_Xe',
     '12. DaoTao_PhatTrien',
     '13. CuocHop_PhongHop',
     '14. DuAn_CongViec',

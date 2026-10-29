@@ -60,14 +60,6 @@ export const IMPLEMENTED_MODULES: Record<string, LazyExoticComponent<ComponentTy
   'hanh-chinh/noi-quan-ly': lazy(() => import('./hanh-chinh/tai-san/NoiQuanLyPage')),
   'hanh-chinh/thiet-lap-tai-san': lazy(() => import('./hanh-chinh/tai-san/ThietLapTaiSanPage')),
 
-  // === HÀNH CHÍNH: Quản lý xe ===
-  'hanh-chinh/danh-sach-xe': lazy(() => import('./hanh-chinh/quan-ly-xe/DanhSachXePage')),
-  'hanh-chinh/su-dung-xe': lazy(() => import('./hanh-chinh/quan-ly-xe/SuDungXePage')),
-  'hanh-chinh/lich-bao-duong': lazy(() => import('./hanh-chinh/quan-ly-xe/LichBaoDuongPage')),
-  'hanh-chinh/phieu-xang-chi-phi-xe': lazy(() => import('./hanh-chinh/quan-ly-xe/PhieuXangChiPhiXePage')),
-  'hanh-chinh/bao-cao-xe': lazy(() => import('./hanh-chinh/quan-ly-xe/BaoCaoXePage')),
-  'hanh-chinh/quan-ly-lai-xe': lazy(() => import('./hanh-chinh/quan-ly-xe/QuanLyLaiXePage')),
-  'hanh-chinh/thiet-lap-quan-ly-xe': lazy(() => import('./hanh-chinh/quan-ly-xe/ThietLapQuanLyXePage')),
 
   // === HỆ THỐNG: Sơ đồ tổ chức ===
   'he-thong/phong-ban': lazy(() => import('./he-thong/PhongBanPage')),
