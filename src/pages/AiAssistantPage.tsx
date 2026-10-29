@@ -12,39 +12,73 @@ import {
   CalendarCheck,
   Receipt,
   Users,
+  Banknote,
+  FileText,
+  Database,
 } from 'lucide-react';
 import { PageHeaderBar } from '@/components/data/PageHeaderBar';
 import { Button } from '@/components/ui/Button';
+import { MiniMarkdown } from '@/components/ui/MiniMarkdown';
 import { useAuthStore } from '@/stores/auth';
 import { formatDateTime } from '@/lib/format';
+import { apiFetch } from '@/lib/api';
+
+/** gemini: Gemini trả lời; rules: tự trả lời theo mẫu câu hỏi; offline: chưa có API (chạy cục bộ). */
+type Engine = 'gemini' | 'rules' | 'offline';
 
 interface Message {
   id: string;
   role: 'user' | 'model';
   content: string;
   timestamp: number;
+  engine?: Engine;
+  sources?: string[];
+  notice?: string;
 }
+
+interface AiResponse {
+  reply: string;
+  engine: Engine;
+  sources: string[];
+  notice?: string;
+}
+
+const ENGINE_LABEL: Record<Engine, string> = {
+  gemini: 'Gemini',
+  rules: 'Tra cứu theo mẫu',
+  offline: 'Bản cục bộ (chưa nối dữ liệu)',
+};
 
 const QUICK_PROMPTS = [
   {
-    icon: Users,
-    label: 'Tra cứu nhân sự',
-    prompt: 'Công ty Vũ Gia hiện có những phòng ban nào và quy mô nhân sự ra sao?',
+    icon: CalendarCheck,
+    label: 'Bảng công của tôi',
+    prompt: 'Tháng 2/2025 tôi được bao nhiêu công, đi muộn mấy lần?',
   },
   {
-    icon: CalendarCheck,
-    label: 'Quy định chấm công',
-    prompt: 'Quy định về thời gian làm việc và chấm công hàng ngày tại Vũ Gia như thế nào?',
+    icon: Banknote,
+    label: 'Lương của tôi',
+    prompt: 'Lương tháng 2/2025 của tôi thực lĩnh bao nhiêu?',
   },
   {
     icon: Receipt,
-    label: 'Phiếu hành chính',
-    prompt: 'Hướng dẫn quy trình lập phiếu xin nghỉ phép và phiếu công tác.',
+    label: 'Phiếu của tôi',
+    prompt: 'Phiếu hành chính của tôi đã duyệt chưa?',
+  },
+  {
+    icon: FileText,
+    label: 'Tìm công văn',
+    prompt: 'Tìm công văn về nghỉ Tết',
+  },
+  {
+    icon: Users,
+    label: 'Nhân sự',
+    prompt: 'Phòng ban nào đông nhân viên nhất?',
   },
   {
     icon: Building2,
     label: 'Thông tin công ty',
-    prompt: 'Cho tôi biết thông tin pháp lý, mã số thuế và trụ sở của Công ty Vũ Gia.',
+    prompt: 'Mã số thuế và địa chỉ trụ sở công ty?',
   },
 ];
 
@@ -143,7 +177,7 @@ export function AiAssistantPage() {
     {
       id: '1',
       role: 'model',
-      content: `Xin chào **${userName}**! Tôi là **Trợ lý AI Vũ Gia**. Tôi có thể hỗ trợ bạn tra cứu danh sách nhân sự, sơ đồ phòng ban, quy định chấm công, tính lương và quy trình hành chính. Bạn cần hỗ trợ gì hôm nay?`,
+      content: `Xin chào **${userName}**! Tôi là **Trợ lý AI Vũ Gia**. Tôi tra cứu trực tiếp dữ liệu trên hệ thống: bảng công, giờ làm thêm, lương, phiếu hành chính, công văn, danh bạ nhân sự và thông tin công ty. Bạn cần tra cứu gì?`,
       timestamp: Date.now(),
     },
   ]);
@@ -158,7 +192,7 @@ export function AiAssistantPage() {
     scrollToBottom();
   }, [messages, isPending]);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const text = input.trim();
     if (!text || isPending) return;
@@ -169,23 +203,24 @@ export function AiAssistantPage() {
       content: text,
       timestamp: Date.now(),
     };
+    const history = messages.slice(-8).map((m) => ({ role: m.role, content: m.content }));
 
     setMessages((prev) => [...prev, userMsg]);
     setInput('');
     setIsPending(true);
 
-    // Simulate AI response delay
-    setTimeout(() => {
-      const replyContent = generateSmartReply(text, userName);
-      const botMsg: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'model',
-        content: replyContent,
-        timestamp: Date.now(),
-      };
-      setMessages((prev) => [...prev, botMsg]);
-      setIsPending(false);
-    }, 550);
+    // Server tra cứu Google Sheet (theo quyền của người hỏi); không có API (chạy cục bộ) thì dùng câu trả lời mẫu.
+    let reply: Omit<Message, 'id' | 'role' | 'timestamp'>;
+    try {
+      const res = await apiFetch<AiResponse>('/api/ai', { method: 'POST', body: JSON.stringify({ message: text, history }) });
+      reply = res
+        ? { content: res.reply, engine: res.engine, sources: res.sources, notice: res.notice }
+        : { content: generateSmartReply(text, userName), engine: 'offline' };
+    } catch (err) {
+      reply = { content: `Xin lỗi, chưa trả lời được: ${err instanceof Error ? err.message : 'lỗi không xác định'}. Bạn thử lại sau nhé.` };
+    }
+    setMessages((prev) => [...prev, { id: (Date.now() + 1).toString(), role: 'model', timestamp: Date.now(), ...reply }]);
+    setIsPending(false);
   };
 
   const handleResetChat = () => {
@@ -230,7 +265,7 @@ export function AiAssistantPage() {
                 </span>
               </div>
               <span className="text-xs text-muted-foreground truncate">
-                Hỗ trợ tra cứu & hướng dẫn nghiệp vụ ERP 24/7
+                Tra cứu công, lương, phiếu, công văn từ dữ liệu hệ thống
               </span>
             </div>
           </div>
@@ -273,13 +308,14 @@ export function AiAssistantPage() {
 
                   <div className={`flex flex-col max-w-[90%] md:max-w-[80%] ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
                     <div
-                      className={`relative group px-4 py-3 md:px-5 md:py-3.5 text-sm leading-relaxed shadow-sm break-words whitespace-pre-wrap ${
+                      className={`relative group px-4 py-3 md:px-5 md:py-3.5 text-sm leading-relaxed shadow-sm break-words min-w-0 max-w-full ${
                         msg.role === 'user'
-                          ? 'bg-primary text-primary-foreground rounded-2xl rounded-tr-xs'
+                          ? 'bg-primary text-primary-foreground rounded-2xl rounded-tr-xs whitespace-pre-wrap'
                           : 'bg-card text-foreground border border-border/80 rounded-2xl rounded-tl-xs'
                       }`}
                     >
-                      {msg.content}
+                      {msg.role === 'model' ? <MiniMarkdown text={msg.content} /> : msg.content}
+                      {msg.notice && <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">{msg.notice}</p>}
 
                       {msg.role === 'model' && (
                         <button
@@ -293,8 +329,15 @@ export function AiAssistantPage() {
                         </button>
                       )}
                     </div>
-                    <span className="text-[11px] text-muted-foreground mt-1.5 px-1">
-                      {formatDateTime(new Date(msg.timestamp).toISOString())}
+                    <span className="text-[11px] text-muted-foreground mt-1.5 px-1 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                      <span>{formatDateTime(new Date(msg.timestamp).toISOString())}</span>
+                      {msg.engine && <span>· {ENGINE_LABEL[msg.engine]}</span>}
+                      {msg.sources && msg.sources.length > 0 && (
+                        <span className="inline-flex items-center gap-1" title="Nguồn dữ liệu (tab Google Sheet)">
+                          <Database size={11} aria-hidden />
+                          {msg.sources.join(', ')}
+                        </span>
+                      )}
                     </span>
                   </div>
                 </motion.div>
